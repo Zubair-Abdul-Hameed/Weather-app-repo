@@ -1,0 +1,171 @@
+/* Local font declarations for the project
+   - DM Sans (multiple weights) used as the main UI / body font
+   - Bricolage Grotesque used for headings / display
+   Fonts placed under assets/fonts/<font>/static/ and loaded with font-display: swap
+*/
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('assets/fonts/Bricolage_Grotesque/static/BricolageGrotesque-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('assets/fonts/DM_Sans/static/DMSans-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('assets/fonts/DM_Sans/static/DMSans-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('assets/fonts/DM_Sans/static/DMSans-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('assets/fonts/DM_Sans/static/DMSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Italic variant (semi-bold italic file provided in assets) */
+@font-face {
+  font-family: 'DM Sans';
+  src: url('assets/fonts/DM_Sans/static/DMSans-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: 'DM Sans', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-display: 'Bricolage Grotesque', var(--font-sans);
+}
+
+/* Apply the fonts */
+html, body {
+  font-family: var(--font-sans);
+}
+
+/* Use the display font for headings and elements with .display */
+h1, h2, h3, h4, h5, h6, .display {
+  font-family: var(--font-display);
+}
+
+/* Small helpers for weight usage */
+.fw-light { font-weight: 300; }
+.fw-regular { font-weight: 400; }
+.fw-medium { font-weight: 500; }
+.fw-semibold { font-weight: 600; }
+.fw-bold { font-weight: 700; }
+/* helpers for italic usage */
+.italic { font-style: italic; }
+/* use this to apply the semi-bold italic file that exists (weight 600) */
+.fw-semibold-italic { font-weight: 600; font-style: italic; }
+
+/* Dropdown stacking helpers
+   - Make the dropdown container a positioning context (relative)
+   - Make the dropdown panel absolute and give it a very high z-index so it sits above other content
+   - If your layout uses overflow:hidden on parents, the dropdown may still be clipped; see notes below.
+*/
+.unit-dropdown, .day-dropdown {
+  position: relative; /* ensures the absolute child is positioned relative to this container */
+}
+
+.unit-dropdown > div, .day-dropdown > div {
+  position: absolute; /* take it out of document flow so it can float */
+  z-index: 99999;      /* very high so it sits on top */
+  pointer-events: auto; /* ensure it receives clicks */
+}
+
+/* If you prefer using Tailwind classes instead of this CSS, add `relative` to the parent
+   and `absolute z-50` (or higher) to the dropdown panel element. */
+
+/* Custom scrollbar styles for elements with .custom-scroll */
+.custom-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: hsl(243,23%,24%); /* track color */
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: hsl(243,23%,30%); /* scrollbar knob */
+  border-radius: 8px;
+}
+
+/* .custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #777;
+} */
+
+/* General scrollbar styles for the entire app */
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+  background: hsl(243,96%,9%);
+}
+
+/* Scrollbar handle */
+::-webkit-scrollbar-thumb {
+  background: hsl(243, 27%, 20%);
+  border-radius: 8px;
+}
+
+/* On hover */
+/* ::-webkit-scrollbar-thumb:hover {
+  background: #666;
+} */
+
+.spinner {
+  animation: spin 2s linear infinite;
+}
+
+.loading-dots div {
+  animation: bounce 0.6s infinite ease-in-out;
+}
+
+/* delay each dot */
+.loading-dots div:nth-child(1) {
+  animation-delay: 0s;
+}
+.loading-dots div:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.loading-dots div:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* movement animation */
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-6px); } /* move up */
+  60% { transform: translateY(0); }   /* come down */
+  100% { transform: translateY(0); }
+}
+
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="shortcut icon" href="assets/images/favicon-32x32.png" type="image/x-icon">
+</head>
+<body class="bg-[hsl(243,96%,9%)] text-[hsl(0,0%,100%)] p-4 md:p-10 lg:px-25 lg:py-10">
+  <div class="weather-app-container">
+    <!-- section 1 - navbar -->
+    <div class="flex justify-between items-center">
+      <div class="left"><img src="assets/images/logo.svg" alt="logo" class="w-32"></div>
+      <div class="relative unit-dropdown-div group w-26 h-12.5">
+        <button id="unit-dropdown-btn" class="w-full h-9.5 py-2 px-4 bg-[hsl(243,27%,20%)] rounded-[6px] text-[0.9rem] flex gap-1 items-center cursor-pointer hover:bg-[hsl(243,23%,24%)] focus:outline-none focus:ring-2 focus:ring-white focus:border-2 focus:border-[hsl(243,96%,9%)]"><img src="assets/images/icon-units.svg" alt=""> Units <img src="assets/images/icon-dropdown.svg" alt=""></button>  
+        <!-- Drop down content will go here -->
+        <div id="unit-dropdown" class="w-50 bg-[hsl(243,27%,20%)] rounded-xl mt-3 transform -translate-x-[48%] border border-[hsl(243,23%,30%)] p-2 hidden group-hover:block absolute z-50">
+          <button id="switch-units-btn" class="w-full h-11 text-sm mb-2 p-3 hover:bg-[hsl(243,23%,24%)] rounded-lg cursor-pointer hover:bg-[hsl(243,23%,24%)] duration-300 focus:outline-none focus:ring-1 focus:ring-white focus:border-1 focus:border-[hsl(243,96%,9%)] text-left">Switch to Imperial</button>
+          <div class="border-b-2 border-[hsl(243,23%,24%)] mb-2">
+            <p class="text-sm text-[hsl(240,6%,70%)] mb-2 ml-2">Temperature</p>
+            <p id="temp-metric" class="bg-[hsl(243,23%,24%)] p-2 rounded-lg flex justify-between items-center text-sm cursor-pointer">Celsius (°C) <img src="assets/images/icon-checkmark.svg" alt=""></p>
+            <p id="temp-imperial" class="p-2 rounded-lg flex justify-between items-center text-sm cursor-pointer">Fahrenheit (°F) <img src="assets/images/icon-checkmark.svg" alt="" class="hidden"></p>
+          </div>
+          <div class="border-b-2 border-[hsl(243,23%,24%)] mb-2">
+            <p class="text-sm text-[hsl(240,6%,70%)] mb-2 ml-2">Wind Speed</p>
+            <p id="metric-wind-speed" class="bg-[hsl(243,23%,24%)] p-2 rounded-lg flex justify-between items-center text-sm cursor-pointer">km/h<img src="assets/images/icon-checkmark.svg" alt=""></p>
+            <p id="Imperial-wind-speed" class="p-2 rounded-lg flex justify-between items-center text-sm cursor-pointer">mph<img src="assets/images/icon-checkmark.svg" alt="" class="hidden"></p>
+          </div>
+          <div>
+            <p class="text-sm text-[hsl(240,6%,70%)] mb-2 ml-2">Percipitation</p>
+            <p id="metric-measurement" class="bg-[hsl(243,23%,24%)] p-2 rounded-lg flex justify-between items-center text-sm cursor-pointer">Millimeters (mm) <img src="assets/images/icon-checkmark.svg" alt=""></p>
+            <p id="Imperial-measurement" class="p-2 rounded-lg flex justify-between items-center text-sm cursor-pointer">Inches (in) <img src="assets/images/icon-checkmark.svg" alt="" class="hidden"></p>
+          </div>            
+        </div>
+      </div>
+    </div>
+
+    <!-- Api Error template -->
+    <div id="weather-api-error" class="flex flex-col items-center mt-20 space-y-4 hidden">
+      <img class="w-8" src="assets/images/icon-error.svg" alt="">
+      <h1 class="text-2xl sm:text-3xl text-center">Something went wrong</h1>
+      <p class="text-sm text-[hsl(240,6%,70%)] text-center">We couldn't connect to the server (API error). Please try again in a few moments</p>
+      <button id="retry-btn" class="text-xs flex gap-2 px-3 py-2 bg-[hsl(243,23%,24%)] rounded cursor-pointer hover:bg-[hsl(243,27%,20%)] transition-all duration-200"><img class="w-3" src="assets/images/icon-retry.svg" alt=""> Retry</button>
+    </div>
+
+    <!-- section 2 - Heading -->
+    <h2 id="section2-header" class="text-4xl text-center w-4/5 mx-auto my-12 md:text-5xl">How's the sky looking today?</h2>
+
+    <!-- section 3 - search bar -->
+    <div id="section3-search-div" class="w-full mb-7 space-y-3 mx-auto md:w-3/5 md:flex md:gap-4 md:space-y-0 hidden">
+      <div id="search-bar-container" class="relative w-full md:w-4/5">
+        <img src="assets/images/icon-search.svg" alt="search icon" class="absolute left-5 top-1/2 transform -translate-y-1/2 pointer-events-none w-4.5">
+        <input autocomplete="off" id="search-bar" type="text" placeholder="Search for a place..." class="bg-[hsl(243,27%,20%)] px-12 py-3 rounded-lg w-full h-12 placeholder-[hsl(250,6%,84%)] cursor-pointer hover:bg-[hsl(243,23%,24%)] duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:border-2 focus:border-[hsl(243,96%,9%)]">
+        <!-- Input dropdown will go here, sample is below -->
+        <ul id="input-dropdown" class="absolute bg-[hsl(243,27%,20%)] w-full rounded-lg mt-3 z-50 p-2 space-y-2 hidden">
+          <!-- li will be added dynamically -->
+        </ul>
+      </div>
+      <button id="search-btn" class="w-full h-12 md:w-1/5 bg-[hsl(233,67%,56%)] py-3 rounded-lg text-center cursor-pointer hover:bg-[hsl(248,70%,36%)] duration-300 focus:outline-none focus:ring-2 focus:ring-[hsl(233,67%,56%)] focus:border-2 focus:border-[hsl(243,96%,9%)]">Search</button>
+    </div>
+
+    <!-- No result error template -->
+    <p id="weather-ui-no-result" class="text-xl fw-bold text-center hidden">No search result found!</p>
+
+    <!-- section 4.5 - Loading state display -->
+     <!-- dynamically remove hidden, and add grid in js -->
+    <div id="main-loading-state" class="mb-5 grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 lg:gap-7 hidden"></div>
+    
+    <!-- section 4 - main content - display weather -->
+    <!-- dynamically remove grid n add hidden -->
+    <div id="main-content" class="mb-5 grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 lg:gap-7">
+      <!-- grid of 4 rows on mobile, 2 rows on desktop -->
+      <!-- left -->
+      <div>
+        <!-- row 1 -->
+        <div class="relative w-full h-60 md:h-66">
+          <img src="assets/images/bg-today-small.svg" alt="mobile background" class="absolute top-0 left-0 w-full h-full object-cover rounded-2xl md:hidden">
+          <img src="assets/images/bg-today-large.svg" alt="desktop background" class="absolute top-0 left-0 w-full h-full hidden md:block object-cover rounded-2xl">
+          <div class="w-full md:w-[93%] absolute top-10 md:top-1/2 md:transform md:-translate-y-1/2 left-0 flex flex-col items-center md:flex-row md:justify-between md:left-5 gap-y-3">
+            <div class="space-y-2">
+              <p id="current-location" class="fw-semibold text-2xl text-center md:text-left">Berlin, Germany</p>
+              <p id="current-date" class="fw-light text-sm text-center md:text-left">Tuesday, Aug 05, 2025</p>
+            </div>
+            <div class="flex items-center gap-x-6 md:gap-x-3">
+              <img id="icon-current" src="assets/images/icon-sunny.webp" alt="weather icon" class="w-24">
+              <p id="temperature-display" class="text-7xl italic">68°</p>
+            </div>
+          </div>
+        </div>
+        <!-- row 2 -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4 md:mt-8">
+          <div class="bg-[hsl(243,27%,20%)] rounded-xl h-25 border border-[hsl(243,23%,30%)] p-4 flex flex-col justify-between">
+            <p class="text-[hsl(250,6%,84%)] text-sm">Feels Like</p>
+            <p id="feels-like" class="text-2xl fw-light">64°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-xl h-25 border border-[hsl(243,23%,30%)] p-4 flex flex-col justify-between">
+            <p class="text-[hsl(250,6%,84%)] text-sm">Humidity</p>
+            <p id="humidity-value" class="text-2xl fw-light">46%</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-xl h-25 border border-[hsl(243,23%,30%)] p-4 flex flex-col justify-between">
+            <p class="text-[hsl(250,6%,84%)] text-sm">Wind</p>
+            <p id="wind-value" class="text-2xl fw-light">9 mph</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-xl h-25 border border-[hsl(243,23%,30%)] p-4 flex flex-col justify-between">
+            <p class="text-[hsl(250,6%,84%)] text-sm">Percipitation</p>
+            <p id="precip-value" class="text-2xl fw-light">0 in</p>
+          </div>
+        </div>
+        <!-- row 3 -->
+        <div class="mt-6 md:mt-12">
+          <p>Daily forecast</p>
+          <div id="daily-forecast-container" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 lg:gap-2 xl:gap-4 gap-4 mt-4">
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-[hsl(243,27%,20%)] rounded-xl h-34 border border-[hsl(243,23%,30%)] px-2 py-3">
+              <div class="w-full h-full flex flex-col justify-between">
+                <p class="text-center">Tue</p>
+                <img src="assets/images/icon-rain.webp" alt="weather icon" class="w-13 mx-auto">
+                <div class="w-full flex justify-between">
+                  <span class="text-sm">68°</span>
+                  <span class="text-sm text-[hsl(250,6%,84%)]">57°</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- right -->
+      <div class="w-full py-4 mt-6 md:mt-0 bg-[hsl(243,23%,24%)] rounded-2xl">
+        <div class="px-4 flex justify-between items-center mb-4">
+          <p class="text-lg">Hourly forecast</p>
+          <div class="group w-27 h-12 day-dropdown">
+            <button id="day-dropdown-btn" class="w-full h-9 text-center py-2 flex justify-center gap-x-2 items-center bg-[hsl(243,23%,30%)] rounded-[6px] gap-2 text-sm cursor-pointer">Tuesday <img src="assets/images/icon-dropdown.svg" alt=""></button>
+            <!-- Drop-down goes here! -->
+            <div id="days-drop-down" class="w-50 bg-[hsl(243,27%,20%)] rounded-xl mt-3 transform -translate-x-[48%] border border-[hsl(243,23%,30%)] p-2 flex flex-col gap-2 hidden group-hover:block">
+              <p class="p-2 text-sm bg-[hsl(243,23%,24%)] rounded-lg cursor-pointer">Monday</p> 
+              <p class="p-2 text-sm rounded-lg cursor-pointer">Tuesday</p> 
+              <p class="p-2 text-sm rounded-lg cursor-pointer">Wednesday</p> 
+              <p class="p-2 text-sm rounded-lg cursor-pointer">Thursday</p> 
+              <p class="p-2 text-sm rounded-lg cursor-pointer">Friday</p> 
+              <p class="p-2 text-sm rounded-lg cursor-pointer">Saturday</p> 
+              <p class="p-2 text-sm rounded-lg cursor-pointer">Sunday</p> 
+            </div>
+          </div>
+        </div>
+        <div id="hourly-section-container" class="hourly-section-container w-full h-135 md:h-200 lg:h-135 px-4 overflow-y-auto custom-scroll">
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center mb-4">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+          <div class="bg-[hsl(243,27%,20%)] rounded-lg border border-[hsl(243,23%,30%)] w-full px-4 py-2 flex justify-between items-center">
+            <div class="flex gap-2 justify-between items-center">
+              <img src="assets/images/icon-overcast.webp" alt="cloudy" class="w-9">
+              <p class="text-lg">3 PM</p>
+            </div>
+            <p class="text-sm">68°</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
