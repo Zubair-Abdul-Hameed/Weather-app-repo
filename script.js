@@ -945,4 +945,5 @@ function checkUnit() {
 }
 
 // Initial fetch for a default location
+showMainLoadState()
 handleSearch("New York");
