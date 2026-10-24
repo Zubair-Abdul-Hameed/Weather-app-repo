@@ -3,8 +3,7 @@
 *A responsive weather dashboard for checking current conditions and exploring hourly and 7-day forecasts.*
 
 ## Live Demo
-
-https://weather-app-tawny-six-83.vercel.app/
+[View Live Site](https://weather-app-tawny-six-83.vercel.app/)
 
 ## About the Project
 
